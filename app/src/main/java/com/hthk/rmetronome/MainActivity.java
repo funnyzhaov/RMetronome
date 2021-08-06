@@ -10,6 +10,9 @@ import androidx.databinding.PropertyChangeRegistry;
 import androidx.databinding.ViewDataBinding;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
@@ -48,17 +51,35 @@ public class MainActivity extends AppCompatActivity {
 
         //异步操作后调用
         myLocationListener.enable();
-    }
+
+        //创建观察者与关连
+        Observer<String> nameObserver=new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                mainBinding.title.setText(s);
+            }
+        };
+        viewModel.getName().observe(this,nameObserver);
+        viewModel.getName().setValue("ASS");
 
 
-    //可观察对象
-    static class User extends BaseObservable{
-        private String name;
+        //快捷的写法
+        viewModel.getName().observe(this,name->{
+            // update UI
+        });
     }
+
 
     //viewModel
     static class MainViewModel extends ViewModel{
-        private User mUser;
+        private MutableLiveData<String> mName;
+
+        public MutableLiveData<String> getName() {
+            if (mName==null){
+                mName=new MutableLiveData<>();
+            }
+            return mName;
+        }
     }
 
     //示例，位置生命周期观察者
